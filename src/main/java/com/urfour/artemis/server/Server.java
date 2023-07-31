@@ -37,7 +37,6 @@ public class Server implements Runnable {
 
     public void run() {
         try {
-            System.out.println(gson.toJson(infos));
             infos.update();
             HttpClient httpClient = HttpClientBuilder.create().build();
             HttpPost request = new HttpPost(IP + "plugins/25dacd2d-9275-4d94-bc12-8761dedf0f1d/Minecraft");
