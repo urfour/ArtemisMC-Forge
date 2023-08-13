@@ -16,18 +16,23 @@ import java.io.InputStream;
 
 public class Server implements Runnable {
 
+    private static String getArtemisFolder() {
+        if (System.getProperty("os.name").contains("Windows")) {
+            return System.getenv("ProgramData");
+        }
+        else {
+            return System.getProperty("user.home") + "/.local/share";
+        }
+    }
     private MinecraftInfos infos = new MinecraftInfos();
     private static final Logger LOGGER = LogManager.getLogger("Server");
-    private static final String WEB_SERVER_FILE = System.getenv("ProgramData") + "/Artemis/webserver.txt";
-    private String IP = "http://localhost:9696";
+    private static final String WEB_SERVER_FILE = getArtemisFolder() + "/Artemis/webserver.txt";
+    private String IP;
     private Gson gson =  new Gson();
-    public void getIP() {
-
-    }
 
     public Server() {
         try {
-            InputStream file = new FileInputStream(new File(WEB_SERVER_FILE));
+            InputStream file = new FileInputStream(WEB_SERVER_FILE);
             IP = new String(file.readAllBytes());
             LOGGER.info("Using IP " + IP + " to send in-game information.");
         } catch (IOException e) {

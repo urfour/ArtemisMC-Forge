@@ -115,10 +115,12 @@ public class MinecraftInfos {
                 rightHandItem = testIfAir(player.getMainHandItem());
                 leftHandItem = testIfAir(player.getOffhandItem());
                 currentHotbarSlot = player.getInventory().selected;
-                armor.put("boots", armorItems.get(0));
-                armor.put("leggings", armorItems.get(1));
-                armor.put("chestplate", armorItems.get(2));
-                armor.put("helmet", armorItems.get(3));
+                if (!armorItems.isEmpty()) {
+                    armor.put("boots", armorItems.get(0));
+                    armor.put("leggings", armorItems.get(1));
+                    armor.put("chestplate", armorItems.get(2));
+                    armor.put("helmet", armorItems.get(3));
+                }
                 inGame = true;
             } catch (Exception ex) {
                 inGame = false;
