@@ -1,51 +1,57 @@
 package com.urfour.artemis.infos;
 
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.client.gui.screens.controls.ControlsScreen;
 import net.minecraft.client.gui.screens.controls.KeyBindsScreen;
 import net.minecraft.client.gui.screens.OptionsScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.biome.Biome;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 public class MinecraftInfos {
-    private PlayerInfos player = new PlayerInfos();
-    private WorldInfos world = new WorldInfos();
-    private GUIInfos gui = new GUIInfos();
+    private PlayerInfos Player = new PlayerInfos();
+    private WorldInfos World = new WorldInfos();
+    private GUIInfos Gui = new GUIInfos();
 
     public void update() {
-        player.getInfos();
-        world.getInfos();
-        gui.getInfos();
+        Player.getInfos();
+        World.getInfos();
+        Gui.getInfos();
     }
 
     private static class PlayerInfos {
-        private boolean inGame;
-        private float health;
-        private float maxHealth;
-        private float absorption;
-        private boolean isDead;
-        private int armorPoints;
-        private int experienceLevel;
-        private float experience;
-        private int foodLevel;
-        private float saturationLevel;
-        private boolean isSneaking;
-        private boolean isRidingHorse;
-        private boolean isBurning;
-        private boolean isInWater;
-        private HashMap<String, Boolean> playerEffects = new HashMap<>();
+        private boolean InGame;
+        private float Health;
+        private float MaxHealth;
+        private float Absorption;
+        private boolean IsDead;
+        private int ArmorPoints;
+        private int ExperienceLevel;
+        private float Experience;
+        private int FoodLevel;
+        private float SaturationLevel;
+        private boolean IsSneaking;
+        private boolean IsRidingHorse;
+        private boolean IsBurning;
+        private boolean IsInWater;
+        private HashMap<String, Boolean> PlayerEffects = new HashMap<>();
         private static final HashMap<String, MobEffect> TARGET_EFFECTS;
-        private HashMap<String, String> armor = new HashMap<>();
-        private String leftHandItem;
-        private String rightHandItem;
-        private int currentHotbarSlot;
+        private HashMap<String, String> Armor = new HashMap<>();
+        private String LeftHandItem;
+        private String RightHandItem;
+        private int CurrentHotbarSlot;
 
         static {
             TARGET_EFFECTS = new HashMap<>();
@@ -96,97 +102,77 @@ public class MinecraftInfos {
             try {
                 Player player = Minecraft.getInstance().player;
                 assert player != null;
-                this.health = player.getHealth();
-                maxHealth = player.getMaxHealth();
-                absorption = player.getAbsorptionAmount();
-                isDead = !player.isAlive();
-                armorPoints = player.getArmorValue();
-                experienceLevel = player.experienceLevel;
-                experience = player.experienceProgress;
-                foodLevel = player.getFoodData().getFoodLevel();
-                saturationLevel = player.getFoodData().getSaturationLevel();
-                isSneaking = player.isCrouching();
-                isBurning = player.isOnFire();
-                isInWater = player.isInWater();
+                Health = player.getHealth();
+                MaxHealth = player.getMaxHealth();
+                Absorption = player.getAbsorptionAmount();
+                IsDead = !player.isAlive();
+                ArmorPoints = player.getArmorValue();
+                ExperienceLevel = player.experienceLevel;
+                Experience = player.experienceProgress;
+                FoodLevel = player.getFoodData().getFoodLevel();
+                SaturationLevel = player.getFoodData().getSaturationLevel();
+                IsSneaking = player.isCrouching();
+                IsBurning = player.isOnFire();
+                IsInWater = player.isInWater();
                 for (Map.Entry<String, MobEffect> effect : TARGET_EFFECTS.entrySet())
-                    playerEffects.put(effect.getKey(), player.getEffect(effect.getValue()) != null);
+                    PlayerEffects.put(effect.getKey(), player.getEffect(effect.getValue()) != null);
                 ArrayList<String> armorItems = new ArrayList<>();
                 player.getArmorSlots().forEach(item -> armorItems.add(testIfAir(item)));
-                rightHandItem = testIfAir(player.getMainHandItem());
-                leftHandItem = testIfAir(player.getOffhandItem());
-                currentHotbarSlot = player.getInventory().selected;
+                RightHandItem = testIfAir(player.getMainHandItem());
+                LeftHandItem = testIfAir(player.getOffhandItem());
+                CurrentHotbarSlot = player.getInventory().selected;
                 if (!armorItems.isEmpty()) {
-                    armor.put("boots", armorItems.get(0));
-                    armor.put("leggings", armorItems.get(1));
-                    armor.put("chestplate", armorItems.get(2));
-                    armor.put("helmet", armorItems.get(3));
+                    Armor.put("boots", armorItems.get(0));
+                    Armor.put("leggings", armorItems.get(1));
+                    Armor.put("chestplate", armorItems.get(2));
+                    Armor.put("helmet", armorItems.get(3));
                 }
-                inGame = true;
+                InGame = true;
             } catch (Exception ex) {
-                inGame = false;
+                InGame = false;
             }
 
         }
     }
 
     private static class WorldInfos {
-        private long worldTime;
-        private boolean isDayTime;
-        private boolean isRaining;
-        private float rainStrength;
-        private String dimension;
+        private long WorldTime;
+        private boolean IsDayTime;
+        private boolean IsRaining;
+        private float RainStrength;
+        private String Dimension;
+        private String Biome;
 
         private void getInfos() {
             try {
                 ClientLevel world = Minecraft.getInstance().level;
                 assert world != null;
-                worldTime = world.getDayTime();
-                isDayTime = world.isDay();
-                rainStrength = world.getRainLevel(1);
-                isRaining = world.isRaining();
-                dimension = world.dimensionType().effectsLocation().toLanguageKey();
+                WorldTime = world.getDayTime();
+                IsDayTime = world.isDay();
+                RainStrength = world.getRainLevel(1);
+                IsRaining = world.isRaining();
+                Dimension = world.dimensionType().effectsLocation().toLanguageKey();
+                Holder<Biome> biomeHolder = world.getBiome(Minecraft.getInstance().player.blockPosition());
+                Biome biome = biomeHolder.value();
+                biomeHolder.unwrapKey().ifPresent(key -> Biome = Util.makeDescriptionId("biome", key.location()));
             } catch (Exception ex) {
 
             }
         }
     }
     private static class GUIInfos {
-        private class KeyCode {
-            public String code;
-            public String context;
-
-            public KeyCode(String code, String context) {
-                this.code = code;
-                this.context = context;
-            }
-        }
-        private boolean optionsGuiOpen;
-        private boolean controlsGuiOpen;
-        private boolean chatGuiOpen;
-        private boolean keybindsGuiOpen;
-        //private KeyCode[] keys;
+        private boolean OptionsGuiOpen;
+        private boolean ControlsGuiOpen;
+        private boolean ChatGuiOpen;
+        private boolean KeybindsGuiOpen;
 
         private void getInfos() {
             try {
                 Minecraft client = Minecraft.getInstance();
-                chatGuiOpen = client.screen instanceof ChatScreen;
-                optionsGuiOpen = client.screen instanceof OptionsScreen;
-                controlsGuiOpen = client.screen instanceof ControlsScreen;
-                keybindsGuiOpen = client.screen instanceof KeyBindsScreen;
-                /*keys = null;
-                if (keybindsGuiOpen) {
-                    KeyBinding[] temp = client.options.;
-                    List<KeyCode> tempList = new ArrayList<>();
-                    for (KeyBinding key : temp) {
-                        System.out.println(key.toString())
-                        if (!key.getTranslationKey().contains("unknown") && key.getTranslationKey().contains("keyboard")) {
-                            String context = key.getCategory().equals("key.categories.inventory") ? "GUI" : "UNIVERSAL";
-                            tempList.add(new KeyCode(key.getTranslationKey(), null, context));
-                        }
-                    }
-                    keys = new KeyCode[tempList.size()];
-                    keys = tempList.toArray(keys);
-                }*/
+                ChatGuiOpen = client.screen instanceof ChatScreen;
+                OptionsGuiOpen = client.screen instanceof OptionsScreen;
+                ControlsGuiOpen = client.screen instanceof ControlsScreen;
+                KeybindsGuiOpen = client.screen instanceof KeyBindsScreen;
             } catch (Exception ignore) {
 
             }
