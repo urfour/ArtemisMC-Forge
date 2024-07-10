@@ -1,13 +1,21 @@
+
 pluginManagement {
     repositories {
-        gradlePluginPortal()
         maven {
-            name = 'MinecraftForge'
-            url = 'https://maven.minecraftforge.net/'
+            // RetroFuturaGradle
+            name "GTNH Maven"
+            url "https://nexus.gtnewhorizons.com/repository/public/"
+            mavenContent {
+                includeGroup("com.gtnewhorizons")
+                includeGroupByRegex("com\\.gtnewhorizons\\..+")
+            }
         }
+        gradlePluginPortal()
+        mavenCentral()
+        mavenLocal()
     }
 }
 
 plugins {
-    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.5.0'
+    id 'com.gtnewhorizons.gtnhsettingsconvention' version '1.0.23'
 }

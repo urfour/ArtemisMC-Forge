@@ -1,25 +1,20 @@
 package com.urfour.artemis;
 
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Item;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.config.ModConfigEvent;
-import net.minecraftforge.registries.ForgeRegistries;
+import java.io.File;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import net.minecraftforge.common.config.Configuration;
 
-// An example config class. This is not required, but it's a good idea to have one to keep your config organized.
-// Demonstrates how to use Forge's config APIs
-@Mod.EventBusSubscriber(modid = Artemis.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
-public class Config
-{
-    private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
+public class Config {
 
-    static final ForgeConfigSpec SPEC = BUILDER.build();
+    public static String greeting = "Hello! *boom*";
 
+    public static void synchronizeConfiguration(File configFile) {
+        Configuration configuration = new Configuration(configFile);
+
+        greeting = configuration.getString("greeting", Configuration.CATEGORY_GENERAL, greeting, "AAAAAAAAH COMMENT JE DIS BONJOUR");
+
+        if (configuration.hasChanged()) {
+            configuration.save();
+        }
+    }
 }
