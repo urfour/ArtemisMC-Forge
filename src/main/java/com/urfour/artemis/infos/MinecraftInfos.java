@@ -1,36 +1,33 @@
 package com.urfour.artemis.infos;
 
-import net.minecraft.Util;
+import com.mojang.realmsclient.dto.PlayerInfo;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.ChatScreen;
-import net.minecraft.client.gui.screens.controls.ControlsScreen;
-import net.minecraft.client.gui.screens.controls.KeyBindsScreen;
-import net.minecraft.client.gui.screens.OptionsScreen;
-import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.biome.Biome;
+import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.gui.GuiChat;
+import net.minecraft.client.gui.GuiKeyBindingList;
+import net.minecraft.client.gui.GuiOptions;
+import net.minecraft.client.gui.inventory.GuiInventory;
+import net.minecraft.client.multiplayer.WorldClient;
+import net.minecraft.init.MobEffects;
+import net.minecraft.item.ItemStack;
+import net.minecraft.potion.Potion;
+import net.minecraft.potion.PotionEffect;
+import net.minecraft.util.EnumHand;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 
 public class MinecraftInfos {
+    private static final Logger LOG = LogManager.getLogger("artemis-infos");
     private PlayerInfos Player = new PlayerInfos();
     private WorldInfos World = new WorldInfos();
     private GUIInfos Gui = new GUIInfos();
-
     public void update() {
         Player.getInfos();
         World.getInfos();
         Gui.getInfos();
     }
-
     private static class PlayerInfos {
         private boolean InGame;
         private float Health;
@@ -47,7 +44,7 @@ public class MinecraftInfos {
         private boolean IsBurning;
         private boolean IsInWater;
         private HashMap<String, Boolean> PlayerEffects = new HashMap<>();
-        private static final HashMap<String, MobEffect> TARGET_EFFECTS;
+        private static final HashMap<String, Potion> TARGET_EFFECTS;
         private HashMap<String, String> Armor = new HashMap<>();
         private String LeftHandItem;
         private String RightHandItem;
@@ -55,83 +52,94 @@ public class MinecraftInfos {
 
         static {
             TARGET_EFFECTS = new HashMap<>();
-            TARGET_EFFECTS.put("moveSpeed", MobEffect.byId(1));
-            TARGET_EFFECTS.put("moveSlowdown", MobEffect.byId(2));
-            TARGET_EFFECTS.put("haste", MobEffect.byId(3));
-            TARGET_EFFECTS.put("miningFatigue", MobEffect.byId(4));
-            TARGET_EFFECTS.put("strength", MobEffect.byId(5));
-            TARGET_EFFECTS.put("instantHealth", MobEffect.byId(6));
-            TARGET_EFFECTS.put("instantDamage", MobEffect.byId(7));
-            TARGET_EFFECTS.put("jumpBoost", MobEffect.byId(8));
-            TARGET_EFFECTS.put("confusion", MobEffect.byId(9));
-            TARGET_EFFECTS.put("regeneration", MobEffect.byId(10));
-            TARGET_EFFECTS.put("resistance", MobEffect.byId(11));
-            TARGET_EFFECTS.put("fireResistance", MobEffect.byId(12));
-            TARGET_EFFECTS.put("waterBreathing", MobEffect.byId(13));
-            TARGET_EFFECTS.put("invisibility", MobEffect.byId(14));
-            TARGET_EFFECTS.put("blindness", MobEffect.byId(15));
-            TARGET_EFFECTS.put("nightVision", MobEffect.byId(16));
-            TARGET_EFFECTS.put("hunger", MobEffect.byId(17));
-            TARGET_EFFECTS.put("weakness", MobEffect.byId(18));
-            TARGET_EFFECTS.put("poison", MobEffect.byId(19));
-            TARGET_EFFECTS.put("wither", MobEffect.byId(20));
-            TARGET_EFFECTS.put("healthBoost", MobEffect.byId(21));
-            TARGET_EFFECTS.put("absorption", MobEffect.byId(22));
-            TARGET_EFFECTS.put("saturation", MobEffect.byId(23));
-            TARGET_EFFECTS.put("glowing", MobEffect.byId(24));
-            TARGET_EFFECTS.put("levitation", MobEffect.byId(25));
-            TARGET_EFFECTS.put("luck", MobEffect.byId(26));
-            TARGET_EFFECTS.put("badLuck", MobEffect.byId(27));
-            TARGET_EFFECTS.put("slowFalling", MobEffect.byId(28));
-            TARGET_EFFECTS.put("conduitPower", MobEffect.byId(29));
-            TARGET_EFFECTS.put("dolphinsGrace", MobEffect.byId(30));
-            TARGET_EFFECTS.put("bad_omen", MobEffect.byId(31));
-            TARGET_EFFECTS.put("villageHero", MobEffect.byId(32));
-        }
-        private String testIfAir(ItemStack item) {
-            if (item.getDescriptionId().equals("block.minecraft.air")) {
-                return null;
-            }
-            else {
-                return item.getDescriptionId()
-                        .replace("item.", "")
-                        .replace("block.", "");
-            }
+            TARGET_EFFECTS.put("moveSpeed", MobEffects.SPEED);
+            TARGET_EFFECTS.put("moveSlowdown", MobEffects.SLOWNESS);
+            TARGET_EFFECTS.put("haste", MobEffects.HASTE);
+            TARGET_EFFECTS.put("miningFatigue", MobEffects.MINING_FATIGUE);
+            TARGET_EFFECTS.put("strength", MobEffects.STRENGTH);
+            TARGET_EFFECTS.put("instantHealth", MobEffects.INSTANT_HEALTH);
+            TARGET_EFFECTS.put("instantDamage", MobEffects.INSTANT_DAMAGE);
+            TARGET_EFFECTS.put("jumpBoost", MobEffects.JUMP_BOOST);
+            TARGET_EFFECTS.put("confusion", MobEffects.NAUSEA);
+            TARGET_EFFECTS.put("regeneration", MobEffects.REGENERATION);
+            TARGET_EFFECTS.put("resistance", MobEffects.RESISTANCE);
+            TARGET_EFFECTS.put("fireResistance", MobEffects.FIRE_RESISTANCE);
+            TARGET_EFFECTS.put("waterBreathing", MobEffects.WATER_BREATHING);
+            TARGET_EFFECTS.put("invisibility", MobEffects.INVISIBILITY);
+            TARGET_EFFECTS.put("blindness", MobEffects.BLINDNESS);
+            TARGET_EFFECTS.put("nightVision", MobEffects.NIGHT_VISION);
+            TARGET_EFFECTS.put("hunger", MobEffects.HUNGER);
+            TARGET_EFFECTS.put("weakness", MobEffects.WEAKNESS);
+            TARGET_EFFECTS.put("poison", MobEffects.POISON);
+            TARGET_EFFECTS.put("wither", MobEffects.WITHER);
+            TARGET_EFFECTS.put("healthBoost", MobEffects.HEALTH_BOOST);
+            TARGET_EFFECTS.put("absorption", MobEffects.ABSORPTION);
+            TARGET_EFFECTS.put("saturation", MobEffects.SATURATION);
+            TARGET_EFFECTS.put("glowing", MobEffects.GLOWING);
+            TARGET_EFFECTS.put("levitation", MobEffects.LEVITATION);
+            TARGET_EFFECTS.put("luck", MobEffects.LUCK);
+            TARGET_EFFECTS.put("badLuck", MobEffects.UNLUCK);
+            TARGET_EFFECTS.put("slowFalling", null);
+            TARGET_EFFECTS.put("conduitPower", null);
+            TARGET_EFFECTS.put("dolphinsGrace", null);
+            TARGET_EFFECTS.put("bad_omen", null);
+            TARGET_EFFECTS.put("villageHero", null);
         }
         private void getInfos() {
             try {
-                Player player = Minecraft.getInstance().player;
+                EntityPlayerSP player = Minecraft.getMinecraft().player;
                 assert player != null;
                 Health = player.getHealth();
                 MaxHealth = player.getMaxHealth();
                 Absorption = player.getAbsorptionAmount();
-                IsDead = !player.isAlive();
-                ArmorPoints = player.getArmorValue();
+                IsDead = player.isDead;
+                ArmorPoints = player.getTotalArmorValue();
                 ExperienceLevel = player.experienceLevel;
-                Experience = player.experienceProgress;
-                FoodLevel = player.getFoodData().getFoodLevel();
-                SaturationLevel = player.getFoodData().getSaturationLevel();
-                IsSneaking = player.isCrouching();
-                IsBurning = player.isOnFire();
+                Experience = player.experience;
+                FoodLevel = player.getFoodStats().getFoodLevel();
+                SaturationLevel = player.getFoodStats().getSaturationLevel();
+                IsSneaking = player.isSneaking();
+                IsRidingHorse = player.isRidingHorse();
+                IsBurning = player.isBurning();
                 IsInWater = player.isInWater();
-                for (Map.Entry<String, MobEffect> effect : TARGET_EFFECTS.entrySet())
-                    PlayerEffects.put(effect.getKey(), player.getEffect(effect.getValue()) != null);
-                ArrayList<String> armorItems = new ArrayList<>();
-                player.getArmorSlots().forEach(item -> armorItems.add(testIfAir(item)));
-                RightHandItem = testIfAir(player.getMainHandItem());
-                LeftHandItem = testIfAir(player.getOffhandItem());
-                CurrentHotbarSlot = player.getInventory().selected;
-                if (!armorItems.isEmpty()) {
-                    Armor.put("boots", armorItems.get(0));
-                    Armor.put("leggings", armorItems.get(1));
-                    Armor.put("chestplate", armorItems.get(2));
-                    Armor.put("helmet", armorItems.get(3));
+                for (PotionEffect effect : player.getActivePotionEffects()) {
+                    if (TARGET_EFFECTS.containsKey(effect.getEffectName())) {
+                        PlayerEffects.put(effect.getEffectName(), true);
+                    }
                 }
+                String helmet = player.inventory.armorInventory.get(0).getDisplayName();
+                String chestplate = player.inventory.armorInventory.get(1).getDisplayName();
+                String leggings = player.inventory.armorInventory.get(2).getDisplayName();
+                String boots = player.inventory.armorInventory.get(3).getDisplayName();
+                if (!helmet.equals("Air")) {
+                    Armor.put(helmet, "helmet");
+                }
+                if (!chestplate.equals("Air")) {
+                    Armor.put(chestplate, "chestplate");
+                }
+                if (!leggings.equals("Air")) {
+                    Armor.put(leggings, "leggings");
+                }
+                if (!boots.equals("Air")) {
+                    Armor.put(boots, "boots");
+                }
+                Armor.put("helmet", helmet);
+                Armor.put("chestplate", chestplate);
+                Armor.put("leggings", leggings);
+                Armor.put("boots", boots);
+                String leftHandItem = player.getHeldItem(EnumHand.MAIN_HAND).getDisplayName();
+                String rightHandItem = player.getHeldItem(EnumHand.OFF_HAND).getDisplayName();
+                if (!leftHandItem.equals("Air")) {
+                    LeftHandItem = leftHandItem;
+                }
+                if (!rightHandItem.equals("Air")) {
+                    RightHandItem = rightHandItem;
+                }
+                CurrentHotbarSlot = player.inventory.currentItem;
                 InGame = true;
             } catch (Exception ex) {
                 InGame = false;
             }
-
         }
     }
 
@@ -145,35 +153,56 @@ public class MinecraftInfos {
 
         private void getInfos() {
             try {
-                ClientLevel world = Minecraft.getInstance().level;
-                assert world != null;
-                WorldTime = world.getDayTime();
-                IsDayTime = world.isDay();
-                RainStrength = world.getRainLevel(1);
+                WorldClient world = Minecraft.getMinecraft().world;
+                WorldTime = world.getWorldTime();
+                IsDayTime = world.isDaytime();
                 IsRaining = world.isRaining();
-                Dimension = world.dimensionType().effectsLocation().toLanguageKey();
-                Holder<Biome> biomeHolder = world.getBiome(Minecraft.getInstance().player.blockPosition());
-                Biome biome = biomeHolder.value();
-                biomeHolder.unwrapKey().ifPresent(key -> Biome = Util.makeDescriptionId("biome", key.location()));
+                RainStrength = world.rainingStrength;
+                Dimension = world.provider.getDimensionType().getName();
+                Biome = world.getBiome(Minecraft.getMinecraft().player.getPosition()).getBiomeName();
             } catch (Exception ex) {
 
             }
         }
     }
+
     private static class GUIInfos {
+        private class KeyCode {
+            public String code;
+            public String context;
+
+            public KeyCode(String code, String context) {
+                this.code = code;
+                this.context = context;
+            }
+        }
         private boolean OptionsGuiOpen;
-        private boolean ControlsGuiOpen;
+        private boolean InventoryGuiOpen;
         private boolean ChatGuiOpen;
         private boolean KeybindsGuiOpen;
+        private boolean PauseGuiOpen;
+        private boolean DebugGuiOpen;
+        private boolean F3GuiOpen;
+        private boolean AdvancementsGuiOpen;
+        private boolean RecipeGuiOpen;
+        private KeyCode[] Keys;
 
         private void getInfos() {
             try {
-                Minecraft client = Minecraft.getInstance();
-                ChatGuiOpen = client.screen instanceof ChatScreen;
-                OptionsGuiOpen = client.screen instanceof OptionsScreen;
-                ControlsGuiOpen = client.screen instanceof ControlsScreen;
-                KeybindsGuiOpen = client.screen instanceof KeyBindsScreen;
-            } catch (Exception ignore) {
+                Minecraft client = Minecraft.getMinecraft();
+                OptionsGuiOpen = client.currentScreen instanceof GuiOptions;
+                InventoryGuiOpen = client.currentScreen instanceof GuiInventory;
+                ChatGuiOpen = client.currentScreen instanceof GuiChat;
+                PauseGuiOpen = client.currentScreen == null;
+                DebugGuiOpen = client.gameSettings.showDebugInfo;
+                F3GuiOpen = client.gameSettings.showDebugInfo;
+                AdvancementsGuiOpen = client.currentScreen != null && client.currentScreen.getClass().getName().equals("net.minecraft.client.gui.advancements.GuiScreenAdvancements");
+                RecipeGuiOpen = client.currentScreen != null && client.currentScreen.getClass().getName().equals("net.minecraft.client.gui.recipebook.GuiRecipeBook");
+                Keys = new KeyCode[client.gameSettings.keyBindings.length];
+                for (int i = 0; i < client.gameSettings.keyBindings.length; i++) {
+                    Keys[i] = new KeyCode(client.gameSettings.keyBindings[i].getKeyCode() + "", client.gameSettings.keyBindings[i].getKeyDescription());
+                }
+            } catch (Exception ex) {
 
             }
         }

@@ -1,44 +1,41 @@
 package com.urfour.artemis;
 
-import com.mojang.logging.LogUtils;
 import com.urfour.artemis.server.Server;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import org.slf4j.Logger;
+import net.minecraftforge.fml.common.SidedProxy;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-// The value here should match an entry in the META-INF/mods.toml file
-@Mod(Artemis.MODID)
-public class Artemis
-{
-    // Define mod id in a common place for everything to reference
-    public static final String MODID = "artemismc";
-    // Directly reference a slf4j logger
-    private static final Logger LOGGER = LogUtils.getLogger();
+@Mod(modid = Artemis.MODID, version = "1.1.1.2", name = "ArtemisMC", acceptedMinecraftVersions = "[1.12.2]")
+public class Artemis {
 
-    public Artemis()
-    {
-        // Register our mod's ForgeConfigSpec so that Forge can create and load the config file for us
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.SPEC);
+    public static final String MODID = "artemis";
+    public static final Logger LOG = LogManager.getLogger(MODID);
+
+    @SidedProxy(clientSide = "com.urfour.artemis.ClientProxy", serverSide = "com.urfour.artemis.CommonProxy")
+    public static CommonProxy proxy;
+
+    @Mod.EventHandler
+    // preInit "Run before anything else. Read your config, create blocks, items, etc, and register them with the
+    // GameRegistry." (Remove if not needed)
+    public void preInit(FMLPreInitializationEvent event) {
+        proxy.preInit(event);
     }
 
-    // You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent
-    @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
-    public static class ClientModEvents
-    {
-        @SubscribeEvent
-        public static void onClientSetup(FMLClientSetupEvent event)
-        {
-            Server server = new Server();
-            ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-            scheduler.scheduleAtFixedRate(server, 0, 100, TimeUnit.MILLISECONDS);
-        }
+    @Mod.EventHandler
+    // postInit "Handle interaction with other mods, complete your setup based on this." (Remove if not needed)
+    public void postInit(FMLPostInitializationEvent event) {
+        Server server = new Server();
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+        scheduler.scheduleAtFixedRate(server, 0, 100, TimeUnit.MILLISECONDS);
+        proxy.postInit(event);
     }
 }
