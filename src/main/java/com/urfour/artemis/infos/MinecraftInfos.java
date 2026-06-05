@@ -50,7 +50,7 @@ public class MinecraftInfos {
         private boolean IsBurning;
         private boolean IsInWater;
         private final HashMap<String, Boolean> PlayerEffects = new HashMap<>();
-        private static final HashMap<Holder<MobEffect>, String> EFFECT_TO_KEY;
+        private static final HashMap<String, String> EFFECT_TO_KEY;
         private final HashMap<String, String> Armor = new HashMap<>();
         private String LeftHandItem;
         private String RightHandItem;
@@ -58,38 +58,38 @@ public class MinecraftInfos {
 
         static {
             EFFECT_TO_KEY = new HashMap<>();
-            EFFECT_TO_KEY.put(MobEffects.MOVEMENT_SPEED, "moveSpeed");
-            EFFECT_TO_KEY.put(MobEffects.MOVEMENT_SLOWDOWN, "moveSlowdown");
-            EFFECT_TO_KEY.put(MobEffects.DIG_SPEED, "haste");
-            EFFECT_TO_KEY.put(MobEffects.DIG_SLOWDOWN, "miningFatigue");
-            EFFECT_TO_KEY.put(MobEffects.DAMAGE_BOOST, "strength");
-            EFFECT_TO_KEY.put(MobEffects.HEAL, "instantHealth");
-            EFFECT_TO_KEY.put(MobEffects.HARM, "instantDamage");
-            EFFECT_TO_KEY.put(MobEffects.JUMP, "jumpBoost");
-            EFFECT_TO_KEY.put(MobEffects.CONFUSION, "confusion");
-            EFFECT_TO_KEY.put(MobEffects.REGENERATION, "regeneration");
-            EFFECT_TO_KEY.put(MobEffects.DAMAGE_RESISTANCE, "resistance");
-            EFFECT_TO_KEY.put(MobEffects.FIRE_RESISTANCE, "fireResistance");
-            EFFECT_TO_KEY.put(MobEffects.WATER_BREATHING, "waterBreathing");
-            EFFECT_TO_KEY.put(MobEffects.INVISIBILITY, "invisibility");
-            EFFECT_TO_KEY.put(MobEffects.BLINDNESS, "blindness");
-            EFFECT_TO_KEY.put(MobEffects.NIGHT_VISION, "nightVision");
-            EFFECT_TO_KEY.put(MobEffects.HUNGER, "hunger");
-            EFFECT_TO_KEY.put(MobEffects.WEAKNESS, "weakness");
-            EFFECT_TO_KEY.put(MobEffects.POISON, "poison");
-            EFFECT_TO_KEY.put(MobEffects.WITHER, "wither");
-            EFFECT_TO_KEY.put(MobEffects.HEALTH_BOOST, "healthBoost");
-            EFFECT_TO_KEY.put(MobEffects.ABSORPTION, "absorption");
-            EFFECT_TO_KEY.put(MobEffects.SATURATION, "saturation");
-            EFFECT_TO_KEY.put(MobEffects.GLOWING, "glowing");
-            EFFECT_TO_KEY.put(MobEffects.LEVITATION, "levitation");
-            EFFECT_TO_KEY.put(MobEffects.LUCK, "luck");
-            EFFECT_TO_KEY.put(MobEffects.UNLUCK, "badLuck");
-            EFFECT_TO_KEY.put(MobEffects.SLOW_FALLING, "slowFalling");
-            EFFECT_TO_KEY.put(MobEffects.CONDUIT_POWER, "conduitPower");
-            EFFECT_TO_KEY.put(MobEffects.DOLPHINS_GRACE, "dolphinsGrace");
-            EFFECT_TO_KEY.put(MobEffects.BAD_OMEN, "bad_omen");
-            EFFECT_TO_KEY.put(MobEffects.HERO_OF_THE_VILLAGE, "villageHero");
+            EFFECT_TO_KEY.put("speed", "moveSpeed");
+            EFFECT_TO_KEY.put("slowness", "moveSlowdown");
+            EFFECT_TO_KEY.put("haste", "haste");
+            EFFECT_TO_KEY.put("mining_fatigue", "miningFatigue");
+            EFFECT_TO_KEY.put("strength", "strength");
+            EFFECT_TO_KEY.put("instant_health", "instantHealth");
+            EFFECT_TO_KEY.put("instant_damage", "instantDamage");
+            EFFECT_TO_KEY.put("jump_boost", "jumpBoost");
+            EFFECT_TO_KEY.put("nausea", "confusion");
+            EFFECT_TO_KEY.put("regeneration", "regeneration");
+            EFFECT_TO_KEY.put("resistance", "resistance");
+            EFFECT_TO_KEY.put("fire_resistance", "fireResistance");
+            EFFECT_TO_KEY.put("water_breathing", "waterBreathing");
+            EFFECT_TO_KEY.put("invisibility", "invisibility");
+            EFFECT_TO_KEY.put("blindness", "blindness");
+            EFFECT_TO_KEY.put("night_vision", "nightVision");
+            EFFECT_TO_KEY.put("hunger", "hunger");
+            EFFECT_TO_KEY.put("weakness", "weakness");
+            EFFECT_TO_KEY.put("poison", "poison");
+            EFFECT_TO_KEY.put("wither", "wither");
+            EFFECT_TO_KEY.put("health_boost", "healthBoost");
+            EFFECT_TO_KEY.put("absorption", "absorption");
+            EFFECT_TO_KEY.put("saturation", "saturation");
+            EFFECT_TO_KEY.put("glowing", "glowing");
+            EFFECT_TO_KEY.put("levitation", "levitation");
+            EFFECT_TO_KEY.put("luck", "luck");
+            EFFECT_TO_KEY.put("unluck", "badLuck");
+            EFFECT_TO_KEY.put("slow_falling", "slowFalling");
+            EFFECT_TO_KEY.put("conduit_power", "conduitPower");
+            EFFECT_TO_KEY.put("dolphins_grace", "dolphinsGrace");
+            EFFECT_TO_KEY.put("bad_omen", "bad_omen");
+            EFFECT_TO_KEY.put("hero_of_the_village", "villageHero");
         }
 
         private void getInfos() {
@@ -111,10 +111,17 @@ public class MinecraftInfos {
                 IsInWater = player.isInWater();
 
                 PlayerEffects.clear();
-                for (MobEffectInstance effect : player.getActiveEffects()) {
-                    String key = EFFECT_TO_KEY.get(effect.getEffect());
-                    if (key != null) {
-                        PlayerEffects.put(key, true);
+                for (MobEffectInstance effectInstance : player.getActiveEffects()) {
+                    Holder<MobEffect> effectHolder = effectInstance.getEffect();
+                    String registryPath = effectHolder.unwrapKey()
+                            .map(key -> key.location().getPath())
+                            .orElse(null);
+                    
+                    if (registryPath != null) {
+                        String artemisKey = EFFECT_TO_KEY.get(registryPath);
+                        if (artemisKey != null) {
+                            PlayerEffects.put(artemisKey, true);
+                        }
                     }
                 }
 
