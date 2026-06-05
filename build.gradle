@@ -59,7 +59,7 @@ tasks.named('processResources', ProcessResources).configure {
     ]
     inputs.properties(replaceProperties)
 
-    filesMatching('META-INF/mods.toml') {
+    filesMatching('META-INF/neoforge.mods.toml') {
         expand(replaceProperties)
     }
 }
